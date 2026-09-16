@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>창업가정신 히어로</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        hero: {
+                            purple: '#4C1D95', lightPurple: '#8B5CF6', 
+                            yellow: '#F59E0B', darkYellow: '#D97706',
+                            bg: '#F8FAFC',
+                            optionA: '#1E3A8A', optionB: '#EA580C', 
+                            optionC: '#F59E0B', optionD: '#4C1D95'  
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                        'slide-up': 'slideUp 0.4s ease-out forwards',
+                        'bounce-slight': 'bounceSlight 2s infinite ease-in-out',
+                    },
+                    keyframes: {
+                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+                        slideUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        bounceSlight: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-5px)' } }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #E2E8F0; 
+            color: #1E293B; 
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .kiosk-container {
+            width: 100%;
+            height: 100vh;
+            max-width: 768px; 
+            margin: 0 auto;
+            background-color: #F8FAFC;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        
+        @media (min-width: 768px) {
+            body { padding: 2rem 0; }
+            .kiosk-container {
+                height: calc(100vh - 4rem);
+                border-radius: 1.5rem;
+            }
+        }
+
+        .step-container { display: none; opacity: 0; transition: opacity 0.3s ease-in-out; width: 100%; padding-bottom: 10rem; }
+        .step-container.active { display: flex; flex-direction: column; opacity: 1; animation: fadeIn 0.4s ease-out forwards; }
+        
+        .option-card { transition: all 0.2s ease; cursor: pointer; }
+        .option-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        
+        .test-option { border: 4px solid transparent; transition: all 0.2s; }
+        .test-option.selected { border-color: #8B5CF6; box-shadow: 0 0 0 6px rgba(139, 92, 246, 0.2); }
+        .test-option-A { background-color: #EFF6FF; }
+        .test-option-B { background-color: #FFF7ED; }
+        .test-option-C { background-color: #FEF3C7; }
+        .test-option-D { background-color: #FAF5FF; }
+
+        .location-radio input:checked + div { background-color: #8B5CF6; border-color: #8B5CF6; color: white; }
+        
+        .loader {
+            border: 6px solid #E2E8F0; border-top: 6px solid #F59E0B;
+            border-radius: 50%; width: 80px; height: 80px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #toast {
+            visibility: hidden; min-width: 300px; background-color: #333; color: #fff;
+            text-align: center; border-radius: 12px; padding: 20px; position: fixed;
+            z-index: 50; left: 50%; bottom: 40px; transform: translateX(-50%);
+            opacity: 0; transition: opacity 0.3s, bottom 0.3s; font-size: 1.25rem; font-weight: 700;
+        }
+        #toast.show { visibility: visible; opacity: 1; bottom: 120px; } 
+        
+        .full-screen-result { display: flex; flex-direction: column; justify-content: flex-start; align-items: center; width: 100%; text-align: center; height: 100%; min-height: 50vh; padding-top: 1rem;}
+
+        /* ======== 인쇄 설정 ======== */
+        @page { size: A4 portrait; margin: 0; } 
+        
+        @media print {
+            * {
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            body, html { width: 100%; height: 100vh; background-color: white !important; font-size: 11px !important; padding: 0 !important; margin: 0 !important; color: #111827 !important; display: block !important; overflow: hidden !important; }
+            
+            .kiosk-container { width: 100% !important; max-width: 100% !important; height: 100vh !important; max-height: 100vh !important; padding: 6mm 12mm !important; box-sizing: border-box !important; box-shadow: none !important; border: none !important; display: flex !important; flex-direction: column !important; overflow: hidden !important; border-radius: 0 !important;}
+            
+            header, #nav-container, .no-print, #progress-container { display: none !important; }
+            
+            .step-container { display: none !important; padding: 0 !important; }
+            #step-10 { display: flex !important; flex-direction: column !important; opacity: 1 !important; padding: 0 !important; height: 100%; }
+            #result-state { height: 100%; display: flex; flex-direction: column; padding-bottom: 0 !important; }
+            
+            .px-8 { padding-left: 0 !important; padding-right: 0 !important; }
+            
+            .print-header { margin-bottom: 8px !important; text-align: center !important; position: relative !important; width: 100% !important;}
+            .print-logo { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; height: 18px !important; object-fit: contain !important;}
+            
+            .print-header h2 { font-size: 22px !important; margin-bottom: 0px !important; font-weight: 900 !important; color: #4C1D95 !important;}
+            .print-header span { font-size: 11px !important; font-weight: 600 !important; color: #4B5563 !important;}
+            .print-header .bg-purple-100 { padding: 2px 6px !important; font-size: 9px !important; margin-bottom: 2px !important; }
+            
+            .print-grid-container { display: flex !important; flex-direction: column !important; gap: 6px !important; margin-bottom: 0 !important; flex-grow: 1 !important; overflow: hidden !important; }
+            
+            .print-card { border-radius: 6px !important; border: 1px solid #E2E8F0 !important; padding: 0 !important; margin-bottom: 0 !important; background-color: white !important;}
+            .print-card-header { padding: 4px 10px !important; margin-bottom: 0 !important; border-bottom: 1px solid #E2E8F0 !important;}
+            .print-card-header h3 { font-size: 12px !important; font-weight: 900 !important; margin: 0 !important;}
+            .print-card-body { padding: 6px 10px !important; }
+            
+            .print-image-card { flex-grow: 1 !important; display: flex !important; flex-direction: column !important; min-height: 0 !important; overflow: hidden !important; border: 1px solid #E2E8F0 !important; border-radius: 6px !important;}
+            .print-image-card .print-card-body { padding: 0 !important; flex-grow: 1 !important; display: flex !important; justify-content: center !important; align-items: center !important;}
+            #res-image { width: 100% !important; height: 100% !important; max-height: 100% !important; object-fit: contain !important; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px;}
+        }
+    </style>
+</head>
+<body>
+
+    <main class="kiosk-container relative">
+        
+        <!-- 상단 헤더 영역 -->
+        <header class="bg-hero-purple p-6 text-center relative overflow-hidden flex-shrink-0 sm:rounded-t-2xl">
+            <div class="absolute -top-4 -right-4 w-32 h-32 bg-white rounded-full opacity-10"></div>
+            <div class="absolute -bottom-8 -left-8 w-24 h-24 bg-white rounded-full opacity-10"></div>
+            <img src="https://drive.google.com/thumbnail?id=12SbsYVibJUeT5MG-6LffGEJyBoVjX3tG&sz=w400" alt="회사 로고" class="absolute top-6 left-6 h-8 object-contain bg-white rounded-lg px-2 py-1 shadow-md z-20">
+            <div class="relative z-10 flex flex-col items-center justify-center gap-2 mt-1">
+                <h1 class="text-3xl font-black text-white tracking-tight flex items-center gap-2">창업가정신 히어로</h1>
+            </div>
+            <p class="text-purple-200 mt-2 relative z-10 text-base font-semibold">일상의 불편함을 발견하고 세상을 바꾸는 아이디어를 제안하세요!</p>
+        </header>
+
+        <!-- 진행률 표시 바 -->
+        <div id="progress-container" class="w-full bg-gray-200 h-2 hidden relative">
+            <div id="progress-bar" class="bg-hero-yellow h-2 transition-all duration-300 w-0"></div>
+        </div>
+
+        <!-- 메인 컨텐츠 영역 -->
+        <div class="px-8 pt-6 flex-grow flex flex-col overflow-y-auto w-full scroll-smooth">
+            
+            <div id="step-1" class="step-container active">
+                <div class="flex flex-col items-center justify-center w-full min-h-[50vh] mt-auto mb-auto">
+                    <div class="w-40 h-40 bg-purple-100 rounded-full flex items-center justify-center mb-10 animate-bounce-slight text-hero-purple text-7xl shadow-inner">
+                        <i class="fa-solid fa-mask"></i>
+                    </div>
+                    <h2 class="text-5xl font-extrabold text-gray-800 mb-6 text-center tracking-tight leading-snug">히어로님,<br>환영합니다!</h2>
+                    <p class="text-gray-500 mb-10 text-center font-bold text-xl">세상을 바꿀 당신의 멋진 히어로명을 알려주세요.</p>
+                    <div class="w-full max-w-md mt-4">
+                        <input type="text" id="hero-name-input" placeholder="이름을 입력하세요" class="w-full p-6 border-4 border-gray-300 rounded-2xl focus:border-hero-lightPurple focus:ring-4 focus:ring-purple-100 outline-none transition-all text-center text-3xl font-black text-gray-800 shadow-sm" autocomplete="off">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 예시 화면 -->
+            <div id="step-2" class="step-container">
+                <div class="flex flex-col items-center py-4 w-full">
+                    <div class="inline-block bg-yellow-100 text-yellow-800 px-6 py-2 rounded-full font-black text-base mb-4 border border-yellow-200 shadow-sm">MISSION START</div>
+                    <h2 class="text-4xl font-black text-hero-purple mb-5 break-keep leading-tight text-center">창업가정신(Entrepreneurship)이란?</h2>
+                    
+                    <div class="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-3xl border-4 border-hero-lightPurple shadow-lg w-full mb-8 relative overflow-hidden">
+                        <div class="absolute -top-6 -right-6 w-24 h-24 bg-yellow-200 rounded-full opacity-50"></div>
+                        <div class="absolute -bottom-6 -left-6 w-20 h-20 bg-purple-200 rounded-full opacity-50"></div>
+                        <p class="text-3xl font-black text-gray-800 leading-relaxed break-keep relative z-10 text-center">
+                            스스로 생각하고 행동하여 <br>
+                            <span class="text-hero-purple underline decoration-wavy decoration-hero-yellow text-4xl bg-yellow-100 px-3 py-1.5 rounded mt-3 inline-block">세상에 이로운 변화</span>를<br> 만들어 내는 정신
+                        </p>
+                    </div>
+
+                    <div class="w-full">
+                        <p class="text-xl font-black text-gray-400 uppercase tracking-wider mb-6">💡 일상 속 불편함과 아이디어 예시</p>
+                        <div class="grid grid-cols-1 gap-6 text-left">
+                            <div class="bg-white rounded-3xl border-2 border-gray-200 shadow-md overflow-hidden flex flex-row items-center p-5 sm:p-6 gap-6">
+                                <div class="w-[45%] relative flex-shrink-0 bg-gray-50 rounded-2xl flex items-center justify-center p-2">
+                                    <img src="https://drive.google.com/thumbnail?id=1M14mlfAAgSZy4klwxG4gwk4q7JDaGpJK&sz=w1000" alt="탁구대 문" class="w-full h-auto object-contain rounded-xl shadow-sm">
+                                </div>
+                                <div class="w-[55%] flex flex-col justify-center py-2 pr-2">
+                                    <span class="text-lg sm:text-xl font-black text-hero-lightPurple bg-purple-100 px-5 py-2 rounded-full w-max mb-3 sm:mb-4">예시 1</span>
+                                    <p class="text-2xl sm:text-[1.75rem] font-black text-gray-800 leading-snug mb-2 sm:mb-3 break-keep tracking-tight">불편: 탁구대 놓을 자리가 없어</p>
+                                    <p class="text-2xl sm:text-[1.75rem] text-hero-darkYellow font-black leading-snug break-keep tracking-tight">아이디어: 탁구대로 변신하는 문</p>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-3xl border-2 border-gray-200 shadow-md overflow-hidden flex flex-row items-center p-5 sm:p-6 gap-6">
+                                <div class="w-[45%] relative flex-shrink-0 bg-gray-50 rounded-2xl flex items-center justify-center p-2">
+                                    <img src="https://drive.google.com/thumbnail?id=1UGKxj4nT40s6vQqydW1G74ZVr7SgdPW3&sz=w1000" alt="계산기 카트" class="w-full h-auto object-contain rounded-xl shadow-sm">
+                                </div>
+                                <div class="w-[55%] flex flex-col justify-center py-2 pr-2">
+                                    <span class="text-lg sm:text-xl font-black text-hero-lightPurple bg-purple-100 px-5 py-2 rounded-full w-max mb-3 sm:mb-4">예시 2</span>
+                                    <p class="text-2xl sm:text-[1.75rem] font-black text-gray-800 leading-snug mb-2 sm:mb-3 break-keep tracking-tight">불편: 장을 보다 예산을 초과해</p>
+                                    <p class="text-2xl sm:text-[1.75rem] text-hero-darkYellow font-black leading-snug break-keep tracking-tight">아이디어: 계산기 부착 쇼핑카트</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 성향 테스트 1~3 -->
+            <div id="step-3" class="step-container">
+                <div class="w-full mt-auto mb-auto">
+                    <div class="text-center mb-10">
+                        <span class="text-lg font-black text-gray-400 tracking-wider">히어로 성향 테스트 [1/3]</span>
+                        <h2 class="text-4xl font-black text-hero-purple mt-4 tracking-tight break-keep leading-tight">Q1. 학교 축제(학예회) 준비 중, 나의 첫 행동은?</h2>
+                    </div>
+                    <div class="grid grid-cols-1 gap-5">
+                        <div class="test-option test-option-A rounded-3xl p-6 sm:p-8 flex items-center gap-5 sm:gap-6 cursor-pointer shadow-md border-2 border-transparent hover:border-hero-lightPurple" data-q="t1" data-val="A">
+                            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-hero-optionA text-white flex items-center justify-center font-black text-3xl flex-shrink-0 shadow-sm">A</div>
+                            <div class="w-full">
+                                <div class="text-[1.75rem] sm:text-3xl font-black text-hero-optionA mb-2 flex items-center gap-3 tracking-tight"><i class="fa-solid fa-magnifying-glass"></i> 정보 검색</div>
+                                <div class="text-base font-bold text-gray-500 leading-snug break-keep">"다른 반이나 다른 학교는 어떻게 했지?" 인터넷으로 인기 있는 아이디어를 찾아본다.</div>
+                            </div>
+                        </div>
+                        <div class="test-option test-option-B rounded-3xl p-6 sm:p-8 flex items-center gap-5 sm:gap-6 cursor-pointer shadow-md border-2 border-transparent hover:border-hero-lightPurple" data-q="t1" data-val="B">
+                            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-hero-optionB text-white flex items-center justify-center font-black text-3xl flex-shrink-0 shadow-sm">B</div>
+                            <div class="w-full">
+                                <div class="text-[1.75rem] sm:text-3xl font-black text-hero-optionB mb-2 flex items-center gap-3 tracking-tight"><i class="fa-solid fa-file-excel"></i> 꼼꼼한 계획</div>
+                                <div class="text-base font-bold text-gray-500 leading-snug break-keep">"준비물은 뭐고, 자리는 어떻게 정하지?" 필요한 돈과 순서부터 꼼꼼하게 정리한다.</div>
+                            </div>
+                        </div>
+                        <div class="test-option test-option-C rounded-3xl p-6 sm:p-8 flex items-center gap-5 sm:gap-6 cursor-pointer shadow-md border-2 border-transparent hover:border-hero-lightPurple" data-q="t1" data-val="C">
+                            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-hero-optionC text-white flex items-center justify-center font-black text-3xl flex-shrink-0 shadow-sm">C</div>
+                            <div class="w-full">
+                                <div class="text-[1.75rem] sm:text-3xl font-black text-hero-optionC mb-2 flex items-center gap-3 tracking-tight"><i class="fa-solid fa-palette"></i> 바로 실행</div>
+                                <div class="text-base font-bold text-gray-500 leading-snug break-keep">"생각난 김에 빨리하자!" 일단 도화지를 펴서 무작정 포스터부터 뚝딱뚝딱 그리기 시작한다.</div>
+                            </div>
+                        </div>
+                        <div class="test-option test-option-D rounded-3xl p-6 sm:p-8 flex items-center gap-5 sm:gap-6 cursor-pointer shadow-md border-2 border-transparent hover:border-hero-lightPurple" data-q="t1" data-val="D">
+                            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-hero-optionD text-white flex items-center justify-center font-black text-3xl flex-shrink-0 shadow-sm">D</div>
+                            <div class="w-full">
+                                <div class="text-[1.75rem] sm:text-3xl font-black text-hero-optionD mb-2 flex items-center gap-3 tracking-tight"><i class="fa-solid fa-users"></i> 친구 챙기기</div>
+                                <div class="text-base font-bold text-gray-500 leading-snug break-keep">"너는 이거 하고, 나는 이거 할게!" 다투지 않게 역할을 나누고, 속상해하는 친구를 먼저 달래준다.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="step-4" class="step-container">
+                <div class="w-full mt-auto mb-auto">
+                    <div class="text-center mb-10">
+                        <span class="text-lg font-black text-gray-400 tracking-wider">히어로 성향 테스트 [2/3]</span>
+                        <h2 class="text-4xl font-black text-hero-purple mt-4 tracking-tight break-keep leading-tight">Q2. 모둠 숙제 발표 전날, 완전히 잘못한 걸 깨달았다! 나의 선택은?</h2>
+                    </div>
+                    <div class="grid grid-cols-1 gap-5">
+                        <div class="test-option test-option-A rounded-3xl p-6 sm:p-8 flex items-center gap-5 sm:gap-6 cursor-pointer shadow-md border-2 border-transparent hover:border-hero-lightPurple" data-q="t2" data-val="A">
+                            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-hero-optionA text-white flex items-center justify-center font-black text-3xl flex-shrink-0 shadow-sm">A</div>
+                            <div class="w-full">
+                                <div class="text-[1.75rem] sm:text-3xl font-black text-hero-optionA mb-2 flex items-center gap-3 tracking-tight"><i class="fa-solid fa-crosshairs"></i> 중요한 것 찾기</div>
+                                <div class="text-base font-bold text-gray-500 leading-snug break-keep">당황하지 않고, 선생님이 가장 중요하게 보실 부분이 어디인지 빠르게 다시 찾아본다.</div>
+                            </div>
+                        </div>
+                        <div class="test-option test-option-B rounded-3xl p-6 sm:p-8 flex items-center gap-5 sm:gap-6 cursor-pointer shadow-md border-2 border-transparent hover:border-hero-lightPurple" data-q="t2" data-val="B">
+                            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-hero-optionB text-white flex items-center justify-center font-black text-3xl flex-shrink-0 shadow-sm">B</div>
+                            <div class="w-full">
+                                <div class="text-[1.75rem] sm:text-3xl font-black text-hero-optionB mb-2 flex items-center gap-3 tracking-tight"><i class="fa-solid fa-list-ul"></i> 처음부터 확인</div>
+                                <div class="text-base font-bold text-gray-500 leading-snug break-keep">"어디서부터 잘못된 거지?" 처음 계획했던 내용부터 차근차근 다시 살펴보고 원인을 찾는다.</div>
+                            </div>
+                        </div>
+                        <div class="test-option test-option-C rounded-3xl p-6 sm:p-8 flex items-center gap-5 sm:gap-6 cursor-pointer shadow-md border-2 border-transparent hover:border-hero-lightPurple" data-q="t2" data-val="C">
+                            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-hero-optionC text-white flex items-center justify-center font-black text-3xl flex-shrink-0 shadow-sm">C</div>
+                            <div class="w-full">
+                                <div class="text-[1.75rem] sm:text-3xl font-black text-hero-optionC mb-2 flex items-center gap-3 tracking-tight"><i class="fa-solid fa-keyboard"></i> 일단 다시 하기</div>
+                                <div class="text-base font-bold text-gray-500 leading-snug break-keep">"밤을 새워서라도 다 하면 되지!" 일단 연필부터 잡고 당장 다시 숙제를 하기 시작한다.</div>
+                            </div>
+                        </div>
+                        <div class="test-option test-option-D rounded-3xl p-6 sm:p-8 flex items-center gap-5 sm:gap-6 cursor-pointer shadow-md border-2 border-transparent hover:border-hero-lightPurple" data-q="t2" data-val="D">
+                            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-hero-optionD text-white flex items-center justify-center font-black text-3xl flex-shrink-0 shadow-sm">D</div>
+                            <div class="w-full">
+                                <div class="text-[1.75rem] sm:text-3xl font-black text-hero-optionD mb-2 flex items-center gap-3 tracking-tight"><i class="fa-solid fa-mug-hot"></i> 친구들 응원하기</div>
+                                <div class="text-base font-bold text-gray-500 leading-snug break-keep">"괜찮아, 할 수 있어!" 깜짝 놀란 모둠 친구들에게 간식을 주면서 기운을 북돋아 준다.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="step-5" class="step-container">
+                <div class="w-full mt-auto mb-auto">
+                    <div class="text-center mb-10">
+                        <span class="text-lg font-black text-gray-400 tracking-wider">히어로 성향 테스트 [3/3]</span>
+                        <h2 class="text-4xl font-black text-hero-purple mt-4 tracking-tight break-keep leading-tight">Q3. 길을 걷다가 정말 신기하고 독특한 가게를 발견했다!</h2>
+                    </div>
+                    <div class="grid grid-cols-1 gap-5">
+                        <div class="test-option test-option-A rounded-3xl p-6 sm:p-8 flex items-center gap-5 sm:gap-6 cursor-pointer shadow-md border-2 border-transparent hover:border-hero-lightPurple" data-q="t3" data-val="A">
+                            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-hero-optionA text-white flex items-center justify-center font-black text-3xl flex-shrink-0 shadow-sm">A</div>
+                            <div class="w-full">
+                                <div class="text-[1.75rem] sm:text-3xl font-black text-hero-optionA mb-2 flex items-center gap-3 tracking-tight"><i class="fa-solid fa-camera"></i> 관찰하고 기록하기</div>
+                                <div class="text-base font-bold text-gray-500 leading-snug break-keep">"간판이 진짜 특이하네!" 나중에 미술 시간이나 일기 쓸 때 써먹으려고 일단 사진부터 찰칵 찍어둔다.</div>
+                            </div>
+                        </div>
+                        <div class="test-option test-option-B rounded-3xl p-6 sm:p-8 flex items-center gap-5 sm:gap-6 cursor-pointer shadow-md border-2 border-transparent hover:border-hero-lightPurple" data-q="t3" data-val="B">
+                            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-hero-optionB text-white flex items-center justify-center font-black text-3xl flex-shrink-0 shadow-sm">B</div>
+                            <div class="w-full">
+                                <div class="text-[1.75rem] sm:text-3xl font-black text-hero-optionB mb-2 flex items-center gap-3 tracking-tight"><i class="fa-solid fa-question"></i> 원리 궁금해하기</div>
+                                <div class="text-base font-bold text-gray-500 leading-snug break-keep">"저기는 하루에 사람이 얼마나 올까?" 사장님은 어떻게 돈을 버는 건지 괜히 궁금해진다.</div>
+                            </div>
+                        </div>
+                        <div class="test-option test-option-C rounded-3xl p-6 sm:p-8 flex items-center gap-5 sm:gap-6 cursor-pointer shadow-md border-2 border-transparent hover:border-hero-lightPurple" data-q="t3" data-val="C">
+                            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-hero-optionC text-white flex items-center justify-center font-black text-3xl flex-shrink-0 shadow-sm">C</div>
+                            <div class="w-full">
+                                <div class="text-[1.75rem] sm:text-3xl font-black text-hero-optionC mb-2 flex items-center gap-3 tracking-tight"><i class="fa-solid fa-cake-candles"></i> 궁금증 바로 해결</div>
+                                <div class="text-base font-bold text-gray-500 leading-snug break-keep">"우와, 맛있겠다!" 더 고민할 시간 없이, 무조건 문부터 열고 냅다 들어가 본다!</div>
+                            </div>
+                        </div>
+                        <div class="test-option test-option-D rounded-3xl p-6 sm:p-8 flex items-center gap-5 sm:gap-6 cursor-pointer shadow-md border-2 border-transparent hover:border-hero-lightPurple" data-q="t3" data-val="D">
+                            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-hero-optionD text-white flex items-center justify-center font-black text-3xl flex-shrink-0 shadow-sm">D</div>
+                            <div class="w-full">
+                                <div class="text-[1.75rem] sm:text-3xl font-black text-hero-optionD mb-2 flex items-center gap-3 tracking-tight"><i class="fa-solid fa-share-nodes"></i> 친구들에게 알리기</div>
+                                <div class="text-base font-bold text-gray-500 leading-snug break-keep">"내 친구들이 딱 좋아하겠네!" 당장 친구들 단톡방에 사진을 보내서 여기 가보자고 알려준다.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6 (히어로 이미지) -->
+            <div id="step-6" class="step-container">
+                <div class="full-screen-result mt-auto mb-auto w-full">
+                    <span class="text-lg font-black text-hero-lightPurple tracking-wider bg-purple-50 px-6 py-2.5 rounded-full border border-purple-100 mb-6 animate-slide-up">유형 분석 완료</span>
+                    <h2 class="text-5xl font-black text-gray-800 mb-8 tracking-tight">당신의 히어로 유형</h2>
+                    
+                    <div class="w-full bg-gradient-to-br from-indigo-50 to-purple-50 border-4 border-purple-200 rounded-3xl p-10 shadow-2xl text-center flex flex-col items-center mb-6">
+                        <div class="inline-block px-6 py-2 bg-white text-purple-800 rounded-full font-black text-base mb-6 border border-purple-200 shadow-sm" id="calc-hero-core">
+                            <i class="fa-solid fa-star text-yellow-500 mr-1"></i> 핵심 능력
+                        </div>
+                        <h3 class="text-5xl font-black text-hero-purple mb-6 break-keep" id="calc-hero-title">히어로 타입</h3>
+                        <p class="text-gray-700 text-xl leading-relaxed font-bold break-keep" id="calc-hero-desc">설명</p>
+                    </div>
+
+                    <img id="calc-hero-img" src="" alt="히어로 이미지" class="hidden w-full max-h-56 object-contain drop-shadow-xl animate-bounce-slight rounded-2xl mb-8">
+                </div>
+            </div>
+
+            <div id="step-7" class="step-container">
+                <div class="w-full mt-auto mb-auto">
+                    <h2 class="text-4xl font-black text-gray-800 mb-4 tracking-tight text-center">불편한 장소 찾기</h2>
+                    <p class="text-gray-500 mb-10 font-bold text-xl text-center">가장 자주 불편함을 느끼는 장소를 <span class="text-hero-lightPurple underline decoration-wavy">하나만</span> 선택해주세요.</p>
+                    <div class="grid grid-cols-2 gap-5">
+                        <label class="location-radio cursor-pointer relative">
+                            <input type="radio" name="location" class="peer sr-only" value="교실">
+                            <div class="p-6 border-4 border-gray-200 rounded-3xl text-center font-black text-gray-600 transition-all peer-checked:bg-hero-lightPurple peer-checked:text-white peer-checked:border-hero-lightPurple hover:bg-gray-50 h-40 flex flex-col justify-center items-center shadow-md">
+                                <i class="fa-solid fa-chalkboard text-6xl mb-4"></i> <span class="text-2xl">교실</span>
+                            </div>
+                        </label>
+                        <label class="location-radio cursor-pointer relative">
+                            <input type="radio" name="location" class="peer sr-only" value="급식실">
+                            <div class="p-6 border-4 border-gray-200 rounded-3xl text-center font-black text-gray-600 transition-all peer-checked:bg-hero-lightPurple peer-checked:text-white peer-checked:border-hero-lightPurple hover:bg-gray-50 h-40 flex flex-col justify-center items-center shadow-md">
+                                <i class="fa-solid fa-utensils text-6xl mb-4"></i> <span class="text-2xl">급식실</span>
+                            </div>
+                        </label>
+                        <label class="location-radio cursor-pointer relative">
+                            <input type="radio" name="location" class="peer sr-only" value="운동장">
+                            <div class="p-6 border-4 border-gray-200 rounded-3xl text-center font-black text-gray-600 transition-all peer-checked:bg-hero-lightPurple peer-checked:text-white peer-checked:border-hero-lightPurple hover:bg-gray-50 h-40 flex flex-col justify-center items-center shadow-md">
+                                <i class="fa-solid fa-futbol text-6xl mb-4"></i> <span class="text-2xl">운동장</span>
+                            </div>
+                        </label>
+                        <label class="location-radio cursor-pointer relative">
+                            <input type="radio" name="location" class="peer sr-only" value="도서실">
+                            <div class="p-6 border-4 border-gray-200 rounded-3xl text-center font-black text-gray-600 transition-all peer-checked:bg-hero-lightPurple peer-checked:text-white peer-checked:border-hero-lightPurple hover:bg-gray-50 h-40 flex flex-col justify-center items-center shadow-md">
+                                <i class="fa-solid fa-book text-6xl mb-4"></i> <span class="text-2xl">도서실</span>
+                            </div>
+                        </label>
+                        <label class="location-radio cursor-pointer relative">
+                            <input type="radio" name="location" class="peer sr-only" value="계단">
+                            <div class="p-6 border-4 border-gray-200 rounded-3xl text-center font-black text-gray-600 transition-all peer-checked:bg-hero-lightPurple peer-checked:text-white peer-checked:border-hero-lightPurple hover:bg-gray-50 h-40 flex flex-col justify-center items-center shadow-md">
+                                <i class="fa-solid fa-stairs text-6xl mb-4"></i> <span class="text-2xl">계단</span>
+                            </div>
+                        </label>
+                        <label class="location-radio cursor-pointer relative">
+                            <input type="radio" name="location" class="peer sr-only" value="화장실">
+                            <div class="p-6 border-4 border-gray-200 rounded-3xl text-center font-black text-gray-600 transition-all peer-checked:bg-hero-lightPurple peer-checked:text-white peer-checked:border-hero-lightPurple hover:bg-gray-50 h-40 flex flex-col justify-center items-center shadow-md">
+                                <i class="fa-solid fa-restroom text-6xl mb-4"></i> <span class="text-2xl">화장실</span>
+                            </div>
+                        </label>
+                        <label class="location-radio cursor-pointer relative">
+                            <input type="radio" name="location" class="peer sr-only" value="복도">
+                            <div class="p-6 border-4 border-gray-200 rounded-3xl text-center font-black text-gray-600 transition-all peer-checked:bg-hero-lightPurple peer-checked:text-white peer-checked:border-hero-lightPurple hover:bg-gray-50 h-40 flex flex-col justify-center items-center shadow-md">
+                                <i class="fa-solid fa-person-walking text-6xl mb-4"></i> <span class="text-2xl">복도</span>
+                            </div>
+                        </label>
+                        <label class="location-radio cursor-pointer relative">
+                            <input type="radio" name="location" class="peer sr-only" value="등굣길">
+                            <div class="p-6 border-4 border-gray-200 rounded-3xl text-center font-black text-gray-600 transition-all peer-checked:bg-hero-lightPurple peer-checked:text-white peer-checked:border-hero-lightPurple hover:bg-gray-50 h-40 flex flex-col justify-center items-center shadow-md">
+                                <i class="fa-solid fa-road text-6xl mb-4"></i> <span class="text-2xl">등굣길</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 8 -->
+            <div id="step-8" class="step-container">
+                <div class="w-full mt-auto mb-auto">
+                    <h2 class="text-4xl font-extrabold text-gray-800 mb-4 tracking-tight text-center">아이디어 제안하기</h2>
+                    <p class="text-gray-500 mb-6 font-bold text-xl text-center">발견한 불편함과 창의적인 해결책을 작성해주세요.</p>
+                    
+                    <div id="hero-hint-box" class="bg-purple-50 border-2 border-purple-200 p-6 rounded-3xl mb-8 flex items-start gap-4 shadow-sm">
+                        <div class="w-12 h-12 rounded-full bg-purple-100 text-hero-lightPurple flex items-center justify-center font-black text-2xl flex-shrink-0 mt-1">
+                            <i class="fa-solid fa-lightbulb"></i>
+                        </div>
+                        <div class="flex-grow">
+                            <h3 id="hint-hero-title" class="text-2xl font-black text-hero-purple mb-1">히어로 힌트</h3>
+                            <p id="hint-hero-desc" class="text-gray-700 font-bold text-lg leading-relaxed break-keep">유형에 맞는 작성 팁이 표시됩니다.</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-8">
+                        <div class="bg-gray-50 p-8 rounded-3xl border border-gray-200 shadow-md">
+                            <label class="block text-gray-800 font-extrabold text-2xl mb-4 flex items-center gap-3">
+                                <i class="fa-solid fa-circle-exclamation text-red-500"></i> 선택 장소(<span id="display-location" class="text-hero-purple underline decoration-dotted"></span>) 불편한 점?
+                            </label>
+                            <textarea id="problem-input" rows="4" class="w-full p-5 border-4 border-gray-300 rounded-2xl focus:border-hero-lightPurple focus:ring-4 focus:ring-purple-100 outline-none resize-none transition-all font-bold text-gray-800 text-xl" placeholder="불편함을 구체적으로 적어주세요..."></textarea>
+                        </div>
+                        
+                        <div class="bg-yellow-50 p-8 rounded-3xl border border-yellow-200 shadow-md relative">
+                            <label class="block text-gray-800 font-extrabold text-2xl mb-4 flex items-center gap-3">
+                                <i class="fa-solid fa-lightbulb text-hero-yellow"></i> 어떻게 해결할 수 있을까요?
+                            </label>
+                            <textarea id="idea-input" rows="4" class="w-full p-5 border-4 border-gray-300 rounded-2xl focus:border-hero-yellow focus:ring-4 focus:ring-yellow-100 outline-none resize-none transition-all font-bold text-gray-800 mb-4 text-xl" placeholder="개선 아이디어를 제안해주세요..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="step-9" class="step-container">
+                <div id="loading-state" class="flex flex-col items-center justify-center py-32 mt-auto mb-auto">
+                    <div class="loader mb-10"></div>
+                    <h3 class="text-4xl font-black text-gray-800 mb-6 tracking-tight">아이디어를 분석 중...</h3>
+                    <p class="text-gray-500 text-center font-bold text-2xl leading-relaxed">히어로의 멋진 아이디어를 분석하여<br>맞춤형 리포트를 만들고 있어요.<br>잠시만 기다려주세요!</p>
+                </div>
+            </div>
+
+            <!-- Step 10 (결과 리포트) -->
+            <div id="step-10" class="step-container" style="padding-bottom: 0; padding-left: 0; padding-right: 0;">
+                <div id="result-state" class="animate-fade-in pb-6 w-full h-full flex flex-col justify-start">
+                    
+                    <div class="text-center mb-6 print-header px-4 relative w-full">
+                        <img src="https://drive.google.com/thumbnail?id=12SbsYVibJUeT5MG-6LffGEJyBoVjX3tG&sz=w400" alt="히어로스쿨 로고" class="hidden print-logo">
+                        
+                        <div class="inline-block bg-purple-100 text-purple-800 px-6 py-2 rounded-full text-base font-black mb-5 border border-purple-200 tracking-wider shadow-sm no-print">
+                            MISSION COMPLETED
+                        </div>
+                        
+                        <div class="flex flex-col items-center justify-center mb-4">
+                            <span class="text-xl font-bold text-gray-500 mb-2"><span id="report-hero-name"></span> 히어로의</span>
+                            <h2 class="text-4xl sm:text-5xl font-black text-hero-purple tracking-tight break-keep leading-tight">프로젝트 기획서</h2>
+                        </div>
+                    </div>
+
+                    <div class="print-grid-container flex-grow flex flex-col gap-6 px-0 sm:px-4">
+                        
+                        <div class="bg-white border-y-2 sm:border-2 border-gray-200 sm:rounded-3xl overflow-hidden shadow-sm print-card">
+                            <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex items-center gap-3 print-card-header">
+                                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 text-xl"><i class="fa-solid fa-magnifying-glass"></i></div>
+                                <h3 class="font-black text-gray-800 text-xl">포착한 문제 & 아이디어</h3>
+                            </div>
+                            <div class="p-6 print-card-body flex flex-col gap-5">
+                                <div class="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-6 border-b border-gray-100 pb-4">
+                                    <div class="w-full sm:w-1/4 font-black text-hero-lightPurple text-lg mt-1 flex-shrink-0 text-left"><i class="fa-solid fa-location-dot mr-1"></i> 장소</div>
+                                    <div class="w-full sm:w-3/4 font-bold text-gray-800 text-xl text-left" id="res-location">장소</div>
+                                </div>
+                                <div class="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-6 border-b border-gray-100 pb-4">
+                                    <div class="w-full sm:w-1/4 font-black text-red-500 text-lg mt-1 flex-shrink-0 text-left"><i class="fa-solid fa-circle-exclamation mr-1"></i> 발견한 불편함</div>
+                                    <div class="w-full sm:w-3/4 font-bold text-gray-800 text-xl leading-relaxed whitespace-pre-line text-left" id="res-problem"></div>
+                                </div>
+                                <div class="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-6">
+                                    <div class="w-full sm:w-1/4 font-black text-hero-darkYellow text-lg mt-1 flex-shrink-0 text-left"><i class="fa-solid fa-lightbulb mr-1"></i> 나의 아이디어</div>
+                                    <div class="w-full sm:w-3/4 font-bold text-gray-800 text-xl leading-relaxed whitespace-pre-line text-left" id="res-idea"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white border-y-2 sm:border-2 border-gray-200 sm:rounded-3xl overflow-hidden shadow-sm print-card">
+                            <div class="bg-green-50 px-6 py-4 border-b border-gray-100 flex items-center gap-3 print-card-header">
+                                <div class="w-10 h-10 rounded-full bg-green-200 flex items-center justify-center text-green-700 text-xl"><i class="fa-solid fa-comment-dots"></i></div>
+                                <h3 class="font-black text-gray-800 text-xl">아이디어 멘토링</h3>
+                            </div>
+                            <div class="p-6 print-card-body">
+                                <div id="res-advice" class="text-gray-800 font-bold text-lg leading-relaxed break-keep space-y-2"></div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white border-y-2 sm:border-2 border-gray-200 sm:rounded-3xl overflow-hidden shadow-sm print-card">
+                            <div class="bg-orange-50 px-6 py-4 border-b border-gray-100 flex items-center gap-3 print-card-header">
+                                <div class="w-10 h-10 rounded-full bg-orange-200 flex items-center justify-center text-orange-700 text-xl"><i class="fa-solid fa-list-check"></i></div>
+                                <h3 class="font-black text-gray-800 text-xl">구체적인 실행 방법</h3>
+                            </div>
+                            <div class="p-6 print-card-body">
+                                <div id="res-action" class="space-y-3 text-gray-800 font-bold text-lg flex flex-col"></div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white border-y-2 sm:border-2 border-gray-200 sm:rounded-3xl overflow-hidden shadow-sm print-card print-image-card flex flex-col">
+                            <div class="bg-blue-50 px-6 py-4 border-b border-gray-100 flex items-center gap-3 print-card-header">
+                                <div class="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 text-xl"><i class="fa-solid fa-palette"></i></div>
+                                <h3 class="font-black text-gray-800 text-xl">아이디어 맞춤 컬러링 도안</h3>
+                            </div>
+                            <div class="p-0 flex flex-col items-center flex-grow print-card-body">
+                                <div class="w-full h-full overflow-hidden bg-white relative flex items-center justify-center print-image-wrapper min-h-[250px]">
+                                    <div id="image-loader" class="loader absolute"></div>
+                                    <img id="res-image" src="" alt="컬러링 도안" class="w-full h-full object-cover sm:object-contain hidden">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    
+                    <div class="mt-6 mb-32 text-center no-print w-full px-4">
+                        <button id="btn-pdf" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 bg-hero-darkYellow text-white rounded-2xl font-black hover:bg-yellow-600 transition-all shadow-xl text-xl">
+                            <i class="fa-solid fa-print"></i> 기획서 프린트 (A4 출력)
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+            
+        </div>
+
+        <div class="absolute bottom-0 left-0 w-full px-8 pb-8 pt-6 bg-gradient-to-t from-[#F8FAFC] via-[#F8FAFC] to-transparent z-20 print:hidden flex gap-4" id="nav-container">
+            <button id="btn-prev" class="w-1/3 px-4 py-6 rounded-2xl font-black text-gray-500 bg-white hover:bg-gray-100 transition-colors invisible text-2xl border-4 border-gray-200 flex justify-center items-center shadow-md">
+                <i class="fa-solid fa-chevron-left mr-3"></i> 이전
+            </button>
+            <button id="btn-next" class="w-2/3 px-6 py-6 bg-hero-purple text-white rounded-2xl font-black text-3xl hover:bg-purple-800 transition-all shadow-xl flex justify-center items-center">
+                테스트 시작 <i class="fa-solid fa-chevron-right ml-4"></i>
+            </button>
+            <button id="btn-submit" class="w-2/3 px-6 py-6 bg-hero-yellow text-white rounded-2xl font-black text-3xl hover:bg-yellow-500 transition-all shadow-xl hidden justify-center items-center">
+                분석하기 <i class="fa-solid fa-wand-magic-sparkles ml-4"></i>
+            </button>
+            <button id="btn-restart" class="w-full px-6 py-6 border-4 border-gray-200 text-gray-700 bg-white rounded-2xl font-black hover:bg-gray-50 transition-colors hidden justify-center items-center text-3xl shadow-md">
+                <i class="fa-solid fa-rotate-right mr-3"></i> 다시 하기
+            </button>
+        </div>
+
+    </main>
+
+    <div id="toast">메시지</div>
+
+    <script>
+        const totalSteps = 10;
+        let currentStep = 1;
+
+        const state = {
+            heroName: '',
+            testAnswers: { t1: '', t2: '', t3: '' },
+            heroType: null,
+            location: '',
+            problem: '',
+            idea: ''
+        };
+
+        const locationImages = {
+            "교실": "https://drive.google.com/thumbnail?id=1ww5mpxjhsEm4ixC9f7TPrNjUEuZiwDZD&sz=w1000", 
+            "급식실": "https://drive.google.com/thumbnail?id=13EhdlAPC1_idn7Qpy2RN28QM4ulrZF8O&sz=w1000",
+            "운동장": "https://drive.google.com/thumbnail?id=12Ji-pzGACXVW-ni-Gu6h1jVuZcrURnOQ&sz=w1000",
+            "도서실": "https://drive.google.com/thumbnail?id=1p0_XBNf7BWT2ypb2_jiqOGZKW-AvwY41&sz=w1000",
+            "계단": "https://drive.google.com/thumbnail?id=1Hy9dEq5pUxkG97no8aIwTfiG_R9Rtxj5&sz=w1000",
+            "화장실": "https://drive.google.com/thumbnail?id=1PRqGyIxblMB73XSJHf3OCHss9N707P3W&sz=w1000",
+            "복도": "https://drive.google.com/thumbnail?id=1t-mvqe1NR9vPGjFwT8UJ6TfxnEFQs5VX&sz=w1000",
+            "등굣길": "https://drive.google.com/thumbnail?id=1kUN9bfV5P98a4Rb2YB5OrLNGEcPyKBg6&sz=w1000"
+        };
+
+        const heroProfiles = {
+            A: { 
+                name: "명탐정 히어로", 
+                core: "숨은 문제 찾기", 
+                desc: "\"어? 이거 좀 불편한데?\" 친구들이 무심코 지나치는 아주 작은 불편함도 돋보기로 보듯 콕 집어내어 찾아내는 우리 반의 명탐정이에요!",
+                hint: "평소에 그냥 지나쳤던 문제야! '왜 이런 일이 자꾸 생길까?' 원인을 곰곰이 생각하고, 새로운 도구를 상상해봐.",
+                imageId: "1nFCXGtF4nG9V4Xq26qfAKCu6kV_M7NZ8"
+            },
+            B: { 
+                name: "꼼꼼 척척 히어로", 
+                core: "차근차근 계획하기", 
+                desc: "복잡하고 어려운 일도 문제없어요! 순서대로 차근차근 꼼꼼하게 계획을 세워서 멋지게 해결해 내는 똑똑한 발명가예요!",
+                hint: "생각을 순서대로 정리해봐! '어떤 준비물이 필요할까?' 1단계, 2단계 순서대로 적어보면 훨씬 쉬워져.",
+                imageId: "1r9ovlgWRTsIUqRgJfUDEQuN8NozhhrOo"
+            },
+            C: { 
+                name: "스피드 히어로", 
+                core: "빛보다 빠른 실행", 
+                desc: "\"고민할 시간에 일단 해보자!\" 번개처럼 빠르게 움직여서 내 생각을 진짜로 만들어내는 멋진 행동대장이에요!",
+                hint: "고민은 그만! 지금 당장 학교에서 쉽게 만들거나 바꿀 수 있는 아이디어를 빠르게 적어보자!",
+                imageId: "1ZgWHMLR0RKDGHhbfeZB8Qy1vcT44GXQJ"
+            },
+            D: { 
+                name: "토닥토닥 히어로", 
+                core: "마음 알아주기", 
+                desc: "친구들의 마음을 따뜻하게 알아주고 다투지 않게 잘 도와주는 우리 반의 든든한 평화 지킴이에요!",
+                hint: "친구들의 마음을 떠올려봐! '누가 이 아이디어를 쓰면 가장 기뻐할까?' 친구들을 활짝 웃게 해줄 다정한 해결책을 적어봐.",
+                imageId: "1Xr50RgKXTK4Mk-wRxL7wMF5YkKe0Gj7V"
+            }
+        };
+
+        const elements = {
+            steps: Array.from({length: totalSteps}, (_, i) => document.getElementById(`step-${i+1}`)),
+            btnPrev: document.getElementById('btn-prev'),
+            btnNext: document.getElementById('btn-next'),
+            btnSubmit: document.getElementById('btn-submit'),
+            btnRestart: document.getElementById('btn-restart'),
+            toastEl: document.getElementById('toast'),
+            scrollArea: document.querySelector('.overflow-y-auto')
+        };
+
+        function showToast(message, duration = 3000) {
+            elements.toastEl.textContent = message;
+            elements.toastEl.className = "show";
+            setTimeout(() => elements.toastEl.classList.remove("show"), duration);
+        }
+
+        document.querySelectorAll('.test-option').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const target = e.currentTarget;
+                target.parentElement.querySelectorAll('.test-option').forEach(s => s.classList.remove('selected'));
+                target.classList.add('selected');
+                state.testAnswers[target.dataset.q] = target.dataset.val;
+            });
+        });
+
+        document.querySelectorAll('input[name="location"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                state.location = e.target.value;
+                document.getElementById('display-location').textContent = state.location;
+            });
+        });
+
+        document.getElementById('btn-pdf').addEventListener('click', () => {
+            window.print();
+        });
+
+        function calculateHeroType() {
+            const counts = Object.values(state.testAnswers).reduce((acc, val) => {
+                acc[val] = (acc[val] || 0) + 1;
+                return acc;
+            }, {});
+            
+            let maxType = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+            state.heroType = heroProfiles[maxType] || heroProfiles[state.testAnswers.t1];
+            
+            document.getElementById('calc-hero-title').textContent = state.heroType.name;
+            document.getElementById('calc-hero-core').innerHTML = `<i class="fa-solid fa-star text-yellow-500 mr-1"></i> 핵심 능력: ${state.heroType.core}`;
+            document.getElementById('calc-hero-desc').textContent = state.heroType.desc;
+            
+            const calcImg = document.getElementById('calc-hero-img');
+            if(state.heroType.imageId) {
+                calcImg.src = `https://drive.google.com/thumbnail?id=${state.heroType.imageId}&sz=w1000`;
+                calcImg.classList.remove('hidden');
+            } else {
+                calcImg.classList.add('hidden');
+            }
+        }
+
+        function updateUI() {
+            elements.steps.forEach((step, idx) => step.classList.toggle('active', idx + 1 === currentStep));
+
+            const isHiddenStep = [1, 2, 6, 9, 10].includes(currentStep);
+            
+            const progressContainer = document.getElementById('progress-container');
+            const progressBar = document.getElementById('progress-bar');
+
+            if (progressContainer) progressContainer.classList.toggle('hidden', isHiddenStep);
+            
+            if (!isHiddenStep && progressBar) {
+                const progress = (currentStep / totalSteps) * 100;
+                progressBar.style.width = `${progress}%`;
+            }
+
+            if (currentStep === 8 && state.heroType) {
+                document.getElementById('hint-hero-title').textContent = `${state.heroType.name} 힌트 💡`;
+                document.getElementById('hint-hero-desc').textContent = state.heroType.hint;
+            }
+
+            elements.btnPrev.classList.toggle('invisible', currentStep === 1);
+            elements.btnPrev.classList.toggle('hidden', currentStep >= 9);
+            
+            elements.btnNext.classList.toggle('hidden', currentStep >= 8);
+            elements.btnSubmit.classList.toggle('hidden', currentStep !== 8);
+            elements.btnRestart.classList.toggle('hidden', currentStep !== 10);
+
+            const nextBtnHTML = {
+                1: `시작하기 <i class="fa-solid fa-chevron-right ml-2"></i>`,
+                2: `테스트 시작 <i class="fa-solid fa-chevron-right ml-2"></i>`
+            };
+            elements.btnNext.innerHTML = nextBtnHTML[currentStep] || `다음 단계 <i class="fa-solid fa-chevron-right ml-2"></i>`;
+            
+            elements.scrollArea.scrollTop = 0;
+        }
+
+        elements.btnNext.addEventListener('click', () => {
+            if (currentStep === 1) {
+                state.heroName = document.getElementById('hero-name-input').value.trim();
+                if (!state.heroName) return showToast("멋진 히어로명을 입력해주세요!");
+            }
+            if ([3, 4, 5].includes(currentStep) && !state.testAnswers[`t${currentStep - 2}`]) return showToast("가장 나다운 행동을 선택해주세요.");
+            if (currentStep === 5) calculateHeroType();
+            if (currentStep === 7 && !state.location) return showToast("불편함을 느끼는 장소를 선택해주세요.");
+
+            if (currentStep < totalSteps) {
+                currentStep++;
+                updateUI();
+            }
+        });
+
+        elements.btnPrev.addEventListener('click', () => {
+            if (currentStep > 1) {
+                currentStep--;
+                updateUI();
+            }
+        });
+
+        elements.btnSubmit.addEventListener('click', () => {
+            state.problem = document.getElementById('problem-input').value.trim();
+            state.idea = document.getElementById('idea-input').value.trim();
+            
+            if (!state.problem) return showToast("불편함을 구체적으로 적어주세요.");
+            if (!state.idea) return showToast("개선 아이디어를 제안해주세요.");
+
+            elements.btnSubmit.disabled = true;
+            
+            currentStep = 9; 
+            updateUI();
+            
+            setTimeout(() => {
+                generateReport();
+            }, 1500);
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                if (e.isComposing || e.keyCode === 229) return; 
+                if (e.target.tagName.toLowerCase() === 'textarea') return;
+                
+                e.preventDefault();
+
+                if (currentStep === 8 && !elements.btnSubmit.classList.contains('hidden') && !elements.btnSubmit.disabled) {
+                    elements.btnSubmit.click();
+                } else if (currentStep < 8 && !elements.btnNext.classList.contains('hidden') && !elements.btnNext.disabled) {
+                    elements.btnNext.click();
+                }
+            }
+        });
+
+        // 아이디어 내용 성격에 따라 맞춤형 멘토링과 실행 계획을 생성하는 함수
+        function getActionPlanData() {
+            const hName = state.heroName;
+            const ideaText = state.idea;
+
+            const isRuleOrSystem = /규칙|자리|순서|바꾸|제도|시기|공평|토론|조회|시간/.test(ideaText);
+            const isInstallOrMake = /설치|만들|기계|도구|상자|카트|문|장치|부착|로봇|자동|화면|모니터|태블릿/.test(ideaText);
+            const isCampaignOrShare = /나누|알리|홍보|캠페인|선물|편지|도와|배려/.test(ideaText);
+
+            let adviceHTML = '';
+            let planList = [];
+
+            if (isRuleOrSystem) {
+                adviceHTML = `<div>💡 멘토의 조언: ${hName} 히어로님! 모두가 함께 지낼 수 있는 새로운 방안을 떠올리다니 정말 기발해요! 사소한 불편함을 다 같이 해결하려는 예쁜 마음이 돋보인답니다. 우리 반을 더 즐겁게 만들어 줄 멋진 도전을 항상 응원할게요!</div>`;
+                planList = [
+                    `📋 1단계: 아이디어를 적용할 규칙이나 순서의 구체적인 내용 정리하기`,
+                    `🛠️ 2단계: 학급 친구들과 선생님께 제안할 실행 방안과 일정 계획하기`,
+                    `📢 3단계: 학급 회의나 건의를 통해 실제로 규칙을 적용하고 피드백 받기`
+                ];
+            } else if (isInstallOrMake) {
+                adviceHTML = `<div>💡 멘토의 조언: ${hName} 히어로님! 불편한 점을 콕 집어내고 이를 해결할 멋진 도구나 방법을 찾아냈네요. 상상 속 생각을 실제로 척척 그려내는 모습이 정말 멋진 발명가 같아요! 반짝이는 아이디어를 차근차근 펼쳐 나갈 앞으로의 활약이 정말 기대돼요.</div>`;
+                planList = [
+                    `📋 1단계: 아이디어를 실현하는 데 필요한 준비물과 도구 목록 적어보기`,
+                    `🛠️ 2단계: 필요한 구조나 사용 방법을 알기 쉽게 설계도나 그림으로 표현하기`,
+                    `📢 3단계: 실제로 설치하거나 활용할 수 있는 위치와 방안 제안하기`
+                ];
+            } else if (isCampaignOrShare) {
+                adviceHTML = `<div>💡 멘토의 조언: ${hName} 히어로님! 주변 친구들이 겪는 어려움을 따뜻하게 공감하고 함께 나누려는 마음이 정말 예뻐요. 친구들을 먼저 생각하는 다정한 마음이 온 세상에 환한 기쁨을 선물해 줄 거예요! 모두를 웃게 만드는 이 멋진 캠페인을 적극 응원할게요.</div>`;
+                planList = [
+                    `📋 1단계: 주변 친구들이 겪는 어려움과 필요한 도움 내용 조사하기`,
+                    `🛠️ 2단계: 친구들과 함께 실천할 수 있는 나눔 및 참여 방법 기획하기`,
+                    `📢 3단계: 주변에 아이디어를 적극적으로 알리고 함께 참여 유도하기`
+                ];
+            } else {
+                // 키워드에 해당하지 않는 경우: 3개의 범용적인 문구 중 하나가 랜덤으로 출력되도록 설정
+                const randomGeneralAdvices = [
+                    `💡 멘토의 조언: ${hName} 히어로님! 일상의 작은 불편함을 그냥 지나치지 않고 이렇게 기발한 해결책을 찾아내다니 정말 대단해요! 친구들의 마음을 쏙 빼닮은 유쾌한 아이디어랍니다. 반짝이는 아이디어를 차근차근 펼쳐 나갈 앞으로의 활약이 정말 기대돼요!`,
+                    `💡 멘토의 조언: ${hName} 히어로님! 우리가 매일 겪는 고민 속에서 이런 멋진 해결 방법을 떠올려내다니 대단한 관찰력이에요! 작은 생각에서 시작된 아이디어가 세상을 바꾼답니다. 내가 직접 주변을 바꿔나가는 이 멋진 도전을 진심으로 응원할게요!`,
+                    `💡 멘토의 조언: ${hName} 히어로님! 주변을 세심하게 둘러보고 나만의 창의적인 아이디어를 제안해 준 점이 정말 멋져요! 친구들과 함께 이야기 나누며 내 생각을 키워나가면 더 완벽해질 거예요. 언제나 반짝이는 아이디어를 만들어내는 멋진 히어로가 되어주세요!`
+                ];
+                
+                const randomIndex = Math.floor(Math.random() * randomGeneralAdvices.length);
+                adviceHTML = `<div>${randomGeneralAdvices[randomIndex]}</div>`;
+
+                planList = [
+                    `📋 1단계: 아이디어를 실행하기 위해 가장 먼저 필요한 행동 생각해보기`,
+                    `🛠️ 2단계: 구체적인 실천 순서와 방법을 단계별로 차근차근 적어보기`,
+                    `📢 3단계: 주변 친구들과 선생님께 내 아이디어를 멋지게 발표하기`
+                ];
+            }
+
+            return { advice: adviceHTML, plan: planList };
+        }
+
+        function generateReport() {
+            document.getElementById('report-hero-name').textContent = state.heroName;
+            document.getElementById('res-location').textContent = state.location;
+
+            document.getElementById('res-problem').textContent = state.problem;
+            document.getElementById('res-idea').textContent = state.idea;
+
+            const imgElement = document.getElementById('res-image');
+            const loaderElement = document.getElementById('image-loader');
+            loaderElement.style.display = 'block';
+            imgElement.classList.add('hidden');
+            
+            const imageUrl = locationImages[state.location] || locationImages["교실"];
+            imgElement.src = imageUrl;
+            
+            imgElement.onload = () => {
+                loaderElement.style.display = 'none';
+                imgElement.classList.remove('hidden');
+            };
+            
+            imgElement.onerror = () => {
+                loaderElement.style.display = 'none';
+                imgElement.src = "https://dummyimage.com/800x600/fee2e2/ef4444.png&text=이미지를+불러올+수+없습니다";
+                imgElement.classList.remove('hidden');
+            };
+
+            const reportData = getActionPlanData();
+
+            document.getElementById('res-action').innerHTML = reportData.plan.map(step => 
+                `<div class="p-2.5 sm:p-3 bg-gray-50 rounded-xl border border-gray-100 text-gray-800 break-keep flex items-start gap-3 shadow-sm">${step}</div>`
+            ).join('');
+            
+            document.getElementById('res-advice').innerHTML = reportData.advice;
+
+            elements.btnSubmit.disabled = false;
+            currentStep = 10;
+            updateUI();
+        }
+
+        elements.btnRestart.addEventListener('click', () => {
+            currentStep = 1;
+            ['hero-name-input', 'problem-input', 'idea-input'].forEach(id => document.getElementById(id).value = '');
+            document.querySelectorAll('.test-option.selected').forEach(btn => btn.classList.remove('selected'));
+            document.querySelectorAll('input[name="location"]').forEach(r => r.checked = false);
+            
+            const img = document.getElementById('res-image');
+            img.src = ''; img.classList.add('hidden');
+            document.getElementById('image-loader').style.display = 'block';
+
+            Object.assign(state, { heroName: '', testAnswers: { t1: '', t2: '', t3: '' }, heroType: null, location: '', problem: '', idea: '' });
+            updateUI();
+        });
+
+        updateUI();
+    </script>
+</body>
+</html>
